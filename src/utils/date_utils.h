@@ -4,10 +4,13 @@
 #include <iomanip>
 #include <sstream>
 
-std::string timestampToString(time_t timestamp) {
-    struct tm timeinfo;
-    localtime_s(&timeinfo, &timestamp); // Äëÿ Windows
-    // Äëÿ Linux/Mac: localtime_r(&timestamp, &timeinfo);
+inline std::string timestampToString(time_t timestamp) {
+    std::tm timeinfo;
+#ifdef _WIN32
+    localtime_s(&timeinfo, &timestamp); // Windows
+#else
+    localtime_r(&timestamp, &timeinfo); // Linux/macOS
+#endif
 
     std::stringstream ss;
     ss << std::put_time(&timeinfo, "%Y-%m-%d %H:%M:%S");
