@@ -1,5 +1,5 @@
 /build/
 *.exe
-*.db
+*.db 
 .vs/
-.idea/
+.idea/ 

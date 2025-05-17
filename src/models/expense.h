@@ -1,4 +1,4 @@
-// Структура расходов
+// РЎС‚СЂСѓРєС‚СѓСЂР° СЂР°СЃС…РѕРґРѕРІ
 #pragma once
 #include <string>
 #include <ctime>
@@ -10,5 +10,5 @@ struct Expense {
 	std::string category{};
 	std::string comment{};
 	time_t timestamp = 0;
-	uint32_t user_id = 0;
-};
+	uint32_t user_id = 0; 
+}; 

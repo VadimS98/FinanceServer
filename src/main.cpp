@@ -5,12 +5,12 @@
 #include "database/expenses_dao.h"
 #include "api/expenses_api.h"
 
-#include "utils/date_utils.h"
+#include "utils/date_utils.h" 
 
 
-// Заполнение тестовыми расходами
+// Р—Р°РїРѕР»РЅРµРЅРёРµ С‚РµСЃС‚РѕРІС‹РјРё СЂР°СЃС…РѕРґР°РјРё
 void fillTestExpenses(ExpensesDAO& dao, uint32_t user_id) {
-    Expense e1{ 0, 500.0, u8"RUB", u8"АПАППАВвававапр", "dinner", time(nullptr), user_id };
+    Expense e1{ 0, 500.0, u8"RUB", u8"РђРџРђРџРџРђР’РІР°РІР°РІР°РїСЂ", "dinner", time(nullptr), user_id };
     Expense e2{ 0, 1200.0, "USD", "transport", "taxi", time(nullptr), user_id };
     Expense e3{ 0, 300.0, "EUR", "entartainment", "cinema", time(nullptr), user_id };
 
@@ -19,7 +19,7 @@ void fillTestExpenses(ExpensesDAO& dao, uint32_t user_id) {
     dao.addExpense(e3);
 }
 
-// Вывод расходов в консоль
+// Р’С‹РІРѕРґ СЂР°СЃС…РѕРґРѕРІ РІ РєРѕРЅСЃРѕР»СЊ
 void printAllExpenses(ExpensesDAO& dao, uint32_t user_id) {
     auto expenses = dao.getExpenses(user_id);
     for (const auto& e : expenses) {
@@ -42,7 +42,7 @@ int main() {
         return 1;
     }
 
-    // Создание DAO и таблицы
+    // РЎРѕР·РґР°РЅРёРµ DAO Рё С‚Р°Р±Р»РёС†С‹
     ExpensesDAO expenses_dao(db_manager);
     if (!expenses_dao.createTable()) {
         std::cerr << "Failed to create expenses table!" << std::endl;
@@ -61,7 +61,7 @@ int main() {
 
     crow::SimpleApp app;
 
-    // Регистрация API
+    // Р РµРіРёСЃС‚СЂР°С†РёСЏ API
     ExpensesAPI expenses_api(expenses_dao);
     expenses_api.registerRoutes(app);
 

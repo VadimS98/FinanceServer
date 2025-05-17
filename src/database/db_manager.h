@@ -9,7 +9,7 @@ private:
 
 public:
 	DBManager(const std::string& path);
-	~DBManager();
+	~DBManager(); 
 
 	bool initialize();
 	sqlite3* getDB() const;

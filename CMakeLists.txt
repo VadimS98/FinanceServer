@@ -4,32 +4,32 @@ project(FinApp VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Поиск зависимостей через vcpkg
+# РџРѕРёСЃРє Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ С‡РµСЂРµР· vcpkg
 find_package(Crow CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(SQLite3 REQUIRED)
 find_package(Tesseract CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)  # Добавлено
+find_package(nlohmann_json CONFIG REQUIRED)  # Р”РѕР±Р°РІР»РµРЅРѕ
 
 add_executable(finapp
-    src/main.cpp
+    src/main.cpp 
     src/database/db_manager.cpp
     src/database/expenses_dao.cpp
     src/api/expenses_api.cpp
  "src/utils/convert_utils.h")
 
-# Пути к заголовкам
+# РџСѓС‚Рё Рє Р·Р°РіРѕР»РѕРІРєР°Рј
 target_include_directories(finapp PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/models
 )
 
-# Линковка библиотек
+# Р›РёРЅРєРѕРІРєР° Р±РёР±Р»РёРѕС‚РµРє
 target_link_libraries(finapp PRIVATE 
     Crow::Crow 
     cpr::cpr 
     SQLite::SQLite3 
     Tesseract::libtesseract
-    nlohmann_json::nlohmann_json  # Добавлено
+    nlohmann_json::nlohmann_json  # Р”РѕР±Р°РІР»РµРЅРѕ
 )

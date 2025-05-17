@@ -38,7 +38,7 @@ crow::response ExpensesAPI::handleAddExpense(const crow::request& req) {
         expense.category = j["category"].get<std::string>();
         expense.comment = j.value("comment", "");
         expense.timestamp = j.value("timestamp", std::time(nullptr));
-        expense.user_id = 1; // Временная заглушка
+        expense.user_id = 1; // Р’СЂРµРјРµРЅРЅР°СЏ Р·Р°РіР»СѓС€РєР°
 
         int id = expenses_dao.addExpense(expense);
         if (id < 0) return crow::response(500, "Internal server error");
@@ -59,7 +59,7 @@ crow::response ExpensesAPI::handleGetExpenses(const crow::request& req) {
     try {
         time_t from = 0, to = 0;
 
-        // Обработка параметра 'from'
+        // РћР±СЂР°Р±РѕС‚РєР° РїР°СЂР°РјРµС‚СЂР° 'from'
         if (req.url_params.get("from") != nullptr) {
             try {
                 from = std::stoll(req.url_params.get("from"));
@@ -69,7 +69,7 @@ crow::response ExpensesAPI::handleGetExpenses(const crow::request& req) {
             }
         }
 
-        // Обработка параметра 'to'
+        // РћР±СЂР°Р±РѕС‚РєР° РїР°СЂР°РјРµС‚СЂР° 'to'
         if (req.url_params.get("to") != nullptr) {
             try {
                 to = std::stoll(req.url_params.get("to"));
@@ -79,9 +79,9 @@ crow::response ExpensesAPI::handleGetExpenses(const crow::request& req) {
             }
         }
 
-        uint32_t user_id = 1; // Временная заглушка
+        uint32_t user_id = 1; // Р’СЂРµРјРµРЅРЅР°СЏ Р·Р°РіР»СѓС€РєР°
 
-        // Логирование параметров для отладки
+        // Р›РѕРіРёСЂРѕРІР°РЅРёРµ РїР°СЂР°РјРµС‚СЂРѕРІ РґР»СЏ РѕС‚Р»Р°РґРєРё
         std::cout << "Request params - user_id: " << user_id
             << ", from: " << from
             << ", to: " << to << std::endl;
@@ -90,7 +90,7 @@ crow::response ExpensesAPI::handleGetExpenses(const crow::request& req) {
 
         json response = json::array();
         for (const auto& e : expenses) {
-            // Проверка валидности данных
+            // РџСЂРѕРІРµСЂРєР° РІР°Р»РёРґРЅРѕСЃС‚Рё РґР°РЅРЅС‹С…
             if (std::isnan(e.amount) || std::isinf(e.amount)) {
                 std::cerr << "Invalid amount value in expense ID: " << e.id << std::endl;
                 continue;
@@ -116,8 +116,8 @@ crow::response ExpensesAPI::handleGetExpenses(const crow::request& req) {
 }
 
 crow::response ExpensesAPI::handleDeleteExpense(int id) {
-    try {
-        uint32_t user_id = 1; // Временная заглушка
+    try { 
+        uint32_t user_id = 1; // Р’СЂРµРјРµРЅРЅР°СЏ Р·Р°РіР»СѓС€РєР°
         if (!expenses_dao.deleteExpense(id, user_id)) {
             return crow::response(404, json{ {"error", "Expense not found"} }.dump());
         }

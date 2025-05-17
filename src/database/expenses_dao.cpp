@@ -15,7 +15,7 @@ bool ExpensesDAO::createTable() {
         "category TEXT NOT NULL, "
         "comment TEXT, "
         "timestamp INTEGER NOT NULL, "
-        "user_id INTEGER NOT NULL);"; // Добавлен user_id
+        "user_id INTEGER NOT NULL);"; // Р”РѕР±Р°РІР»РµРЅ user_id
 
     char* errMsg = nullptr;
     int rc = sqlite3_exec(db_manager.getDB(), sql, nullptr, nullptr, &errMsg);
@@ -40,7 +40,7 @@ int ExpensesDAO::addExpense(const Expense& expense) {
         return -1;
     }
 
-    // Привязка параметров
+    // РџСЂРёРІСЏР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ 
     sqlite3_bind_double(stmt, 1, expense.amount);
     sqlite3_bind_text(stmt, 2, expense.currency.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, expense.category.c_str(), -1, SQLITE_STATIC);
@@ -67,7 +67,7 @@ std::vector<Expense> ExpensesDAO::getExpenses(uint32_t user_id, time_t from_date
         "FROM expenses "
         "WHERE user_id = ? ";
 
-    // Добавляем фильтры по дате, если они заданы
+    // Р”РѕР±Р°РІР»СЏРµРј С„РёР»СЊС‚СЂС‹ РїРѕ РґР°С‚Рµ, РµСЃР»Рё РѕРЅРё Р·Р°РґР°РЅС‹
     if (from_date > 0) sql += "AND timestamp >= ? ";
     if (to_date > 0) sql += "AND timestamp <= ? ";
 
@@ -80,14 +80,14 @@ std::vector<Expense> ExpensesDAO::getExpenses(uint32_t user_id, time_t from_date
         return expenses;
     }
 
-    // Привязка параметров
+    // РџСЂРёРІСЏР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ
     int param_index = 1;
     sqlite3_bind_int(stmt, param_index++, user_id);
 
     if (from_date > 0) sqlite3_bind_int64(stmt, param_index++, from_date);
     if (to_date > 0) sqlite3_bind_int64(stmt, param_index++, to_date);
 
-    // Чтение результатов
+    // Р§С‚РµРЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
         Expense expense;
         expense.id = sqlite3_column_int(stmt, 0);
@@ -96,7 +96,7 @@ std::vector<Expense> ExpensesDAO::getExpenses(uint32_t user_id, time_t from_date
         expense.category = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
         expense.comment = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
         expense.timestamp = sqlite3_column_int64(stmt, 5);
-        expense.user_id = user_id; // user_id берётся из запроса
+        expense.user_id = user_id; // user_id Р±РµСЂС‘С‚СЃСЏ РёР· Р·Р°РїСЂРѕСЃР°
 
         expenses.push_back(expense);
     }

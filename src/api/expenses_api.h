@@ -10,7 +10,7 @@ private:
     ExpensesDAO& expenses_dao;
 
 public:
-    explicit ExpensesAPI(ExpensesDAO& dao);
+    explicit ExpensesAPI(ExpensesDAO& dao); 
     void registerRoutes(crow::SimpleApp& app);
 
 private:

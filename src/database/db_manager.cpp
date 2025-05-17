@@ -6,7 +6,7 @@ DBManager::DBManager(const std::string& path) : db_path(path) {}
 DBManager::~DBManager() {
     if (db) {
         sqlite3_close(db);
-    }
+    } 
 }
 
 bool DBManager::initialize() {
