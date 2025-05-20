@@ -1,12 +1,12 @@
 #include <crow.h>
 #include <sqlite3.h>
 
+#include "utils/date_utils.h"
+
 #include "database/db_manager.h"
 #include "database/expenses_dao.h"
 #include "api/expenses_api.h"
-
-#include "utils/date_utils.h" 
-
+#include "api/middleware/auth_middleware.h"
 
 // Заполнение тестовыми расходами
 void fillTestExpenses(ExpensesDAO& dao, uint32_t user_id) {
@@ -59,7 +59,7 @@ int main() {
     std::cout << std::endl;
 
 
-    crow::SimpleApp app;
+    crow::App<AuthMiddleware> app;
 
     // Регистрация API
     ExpensesAPI expenses_api(expenses_dao);

@@ -7,6 +7,7 @@
         "cpr", 
         "sqlite3",
         "tesseract",
-        "nlohmann-json"
+        "nlohmann-json",
+        "jwt-cpp"
     ]
 }

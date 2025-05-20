@@ -28,6 +28,7 @@ bool ExpensesDAO::createTable() {
     return true;
 }
 
+// Добавление расхода (user_id только из аргумента!)
 int ExpensesDAO::addExpense(const Expense& expense) {
     const char* sql =
         "INSERT INTO expenses (amount, currency, category, comment, timestamp, user_id) "
@@ -40,13 +41,12 @@ int ExpensesDAO::addExpense(const Expense& expense) {
         return -1;
     }
 
-    // Привязка параметров 
     sqlite3_bind_double(stmt, 1, expense.amount);
     sqlite3_bind_text(stmt, 2, expense.currency.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, expense.category.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 4, expense.comment.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_int64(stmt, 5, expense.timestamp);
-    sqlite3_bind_int(stmt, 6, expense.user_id); // user_id
+    sqlite3_bind_int(stmt, 6, expense.user_id); // user_id только из JWT
 
     rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);
@@ -56,9 +56,10 @@ int ExpensesDAO::addExpense(const Expense& expense) {
         return -1;
     }
 
-    return sqlite3_last_insert_rowid(db_manager.getDB());
+    return static_cast<int>(sqlite3_last_insert_rowid(db_manager.getDB()));
 }
 
+// Получение расходов пользователя (user_id только из аргумента!)
 std::vector<Expense> ExpensesDAO::getExpenses(uint32_t user_id, time_t from_date, time_t to_date) {
     std::vector<Expense> expenses;
 
@@ -66,11 +67,8 @@ std::vector<Expense> ExpensesDAO::getExpenses(uint32_t user_id, time_t from_date
         "SELECT id, amount, currency, category, comment, timestamp "
         "FROM expenses "
         "WHERE user_id = ? ";
-
-    // Добавляем фильтры по дате, если они заданы
     if (from_date > 0) sql += "AND timestamp >= ? ";
     if (to_date > 0) sql += "AND timestamp <= ? ";
-
     sql += "ORDER BY timestamp DESC;";
 
     sqlite3_stmt* stmt;
@@ -80,14 +78,11 @@ std::vector<Expense> ExpensesDAO::getExpenses(uint32_t user_id, time_t from_date
         return expenses;
     }
 
-    // Привязка параметров
     int param_index = 1;
     sqlite3_bind_int(stmt, param_index++, user_id);
-
     if (from_date > 0) sqlite3_bind_int64(stmt, param_index++, from_date);
     if (to_date > 0) sqlite3_bind_int64(stmt, param_index++, to_date);
 
-    // Чтение результатов
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
         Expense expense;
         expense.id = sqlite3_column_int(stmt, 0);
@@ -96,7 +91,7 @@ std::vector<Expense> ExpensesDAO::getExpenses(uint32_t user_id, time_t from_date
         expense.category = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
         expense.comment = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
         expense.timestamp = sqlite3_column_int64(stmt, 5);
-        expense.user_id = user_id; // user_id берётся из запроса
+        expense.user_id = user_id; // только из аргумента
 
         expenses.push_back(expense);
     }
@@ -105,6 +100,7 @@ std::vector<Expense> ExpensesDAO::getExpenses(uint32_t user_id, time_t from_date
     return expenses;
 }
 
+// Удаление расхода по id (только если user_id совпадает)
 bool ExpensesDAO::deleteExpense(uint32_t id, uint32_t user_id) {
     const char* sql = "DELETE FROM expenses WHERE id = ? AND user_id = ?;";
 
@@ -121,9 +117,10 @@ bool ExpensesDAO::deleteExpense(uint32_t id, uint32_t user_id) {
     rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);
 
-    return rc == SQLITE_DONE;
+    return rc == SQLITE_DONE && sqlite3_changes(db_manager.getDB()) > 0;
 }
 
+// Получение расхода по id (только если user_id совпадает)
 std::optional<Expense> ExpensesDAO::getExpenseById(uint32_t id, uint32_t user_id) {
     const char* sql =
         "SELECT id, amount, currency, category, comment, timestamp "

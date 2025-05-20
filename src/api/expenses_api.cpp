@@ -8,27 +8,44 @@
 
 ExpensesAPI::ExpensesAPI(ExpensesDAO& dao) : expenses_dao(dao) {}
 
-void ExpensesAPI::registerRoutes(crow::SimpleApp& app) {
+void ExpensesAPI::registerRoutes(crow::App<AuthMiddleware>& app) {
+    // Добавление расхода (user_id только из JWT)
     CROW_ROUTE(app, "/expenses")
         .methods(crow::HTTPMethod::POST)
-        ([this](const crow::request& req) {
-        return handleAddExpense(req);
+        ([this, &app](const crow::request& req) {
+        auto& ctx = app.get_context<AuthMiddleware>(req);
+        if (!ctx.user_id) {
+            return crow::response(401, "Unauthorized");
+        }
+        return handleAddExpense(req, *ctx.user_id);
             });
 
+    // Получение расходов пользователя (user_id только из JWT)
     CROW_ROUTE(app, "/expenses")
         .methods(crow::HTTPMethod::GET)
-        ([this](const crow::request& req) {
-        return handleGetExpenses(req);
+        ([this, &app](const crow::request& req) {
+        auto& ctx = app.get_context<AuthMiddleware>(req);
+        if (!ctx.user_id) {
+            return crow::response(401, "Unauthorized");
+        }
+        return handleGetExpenses(req, *ctx.user_id);
             });
 
+    // Удаление расхода по id (user_id только из JWT)
     CROW_ROUTE(app, "/expenses/<int>")
         .methods(crow::HTTPMethod::DELETE)
-        ([this](int id) {
-        return handleDeleteExpense(id);
+        ([this, &app](const crow::request& req, int id) {
+        auto& ctx = app.get_context<AuthMiddleware>(req);
+        if (!ctx.user_id) {
+            return crow::response(401, "Unauthorized");
+        }
+        return handleDeleteExpense(id, *ctx.user_id);
             });
 }
 
-crow::response ExpensesAPI::handleAddExpense(const crow::request& req) {
+
+// Добавление расхода — user_id только из JWT!
+crow::response ExpensesAPI::handleAddExpense(const crow::request& req, uint32_t user_id) {
     try {
         auto j = json::parse(req.body);
 
@@ -38,7 +55,7 @@ crow::response ExpensesAPI::handleAddExpense(const crow::request& req) {
         expense.category = j["category"].get<std::string>();
         expense.comment = j.value("comment", "");
         expense.timestamp = j.value("timestamp", std::time(nullptr));
-        expense.user_id = 1; // Временная заглушка
+        expense.user_id = user_id; // Только из JWT!
 
         int id = expenses_dao.addExpense(expense);
         if (id < 0) return crow::response(500, "Internal server error");
@@ -55,7 +72,8 @@ crow::response ExpensesAPI::handleAddExpense(const crow::request& req) {
     }
 }
 
-crow::response ExpensesAPI::handleGetExpenses(const crow::request& req) {
+// Получение расходов пользователя — user_id только из JWT!
+crow::response ExpensesAPI::handleGetExpenses(const crow::request& req, uint32_t user_id) {
     try {
         time_t from = 0, to = 0;
 
@@ -79,18 +97,11 @@ crow::response ExpensesAPI::handleGetExpenses(const crow::request& req) {
             }
         }
 
-        uint32_t user_id = 1; // Временная заглушка
-
-        // Логирование параметров для отладки
-        std::cout << "Request params - user_id: " << user_id
-            << ", from: " << from
-            << ", to: " << to << std::endl;
-
+        // user_id только из JWT!
         auto expenses = expenses_dao.getExpenses(user_id, from, to);
 
         json response = json::array();
         for (const auto& e : expenses) {
-            // Проверка валидности данных
             if (std::isnan(e.amount) || std::isinf(e.amount)) {
                 std::cerr << "Invalid amount value in expense ID: " << e.id << std::endl;
                 continue;
@@ -115,9 +126,9 @@ crow::response ExpensesAPI::handleGetExpenses(const crow::request& req) {
     }
 }
 
-crow::response ExpensesAPI::handleDeleteExpense(int id) {
-    try { 
-        uint32_t user_id = 1; // Временная заглушка
+// Удаление расхода — user_id только из JWT!
+crow::response ExpensesAPI::handleDeleteExpense(int id, uint32_t user_id) {
+    try {
         if (!expenses_dao.deleteExpense(id, user_id)) {
             return crow::response(404, json{ {"error", "Expense not found"} }.dump());
         }
